@@ -9,14 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,49 +31,37 @@ import coil.compose.AsyncImage
 
 import com.example.keyra.ui.StrengthBar
 
-data class DraftAccount(val name: String = "", val username: String = "", val password: String = "", val url: String = "", val notes: String = "")
-
 @Composable
-fun AddPasswordScreen(
+fun EditAccountScreen(
+    account: AccountItem,
     onBackClick: () -> Unit = {},
-    onSaveClick: (DraftAccount) -> Unit = {},
-    onGenerateClick: () -> Unit = {},
-    draft: DraftAccount = DraftAccount(),
-    onDraftChange: (DraftAccount) -> Unit = {},
-    prefillPassword: String? = null
+    onSaveClick: (AccountItem) -> Unit = {}
 ) {
-    var accountName by rememberSaveable { mutableStateOf(draft.name) }
-    var username by rememberSaveable { mutableStateOf(draft.username) }
-    var password by rememberSaveable { mutableStateOf(prefillPassword ?: draft.password) }
-    var websiteUrl by rememberSaveable { mutableStateOf(draft.url) }
-    var notes by rememberSaveable { mutableStateOf(draft.notes) }
+    var accountName by remember { mutableStateOf(account.name) }
+    var username by remember { mutableStateOf(account.email) }
+    var password by remember { mutableStateOf(account.password) }
+    var websiteUrl by remember { mutableStateOf(account.url) }
+    var notes by remember { mutableStateOf(account.notes) }
     var errorMsg by remember { mutableStateOf("") }
-
-    LaunchedEffect(prefillPassword) {
-        if (prefillPassword != null) password = prefillPassword
-    }
-    LaunchedEffect(accountName, username, password, websiteUrl, notes) {
-        onDraftChange(DraftAccount(accountName, username, password, websiteUrl, notes))
-    }
     var passwordVisible by remember { mutableStateOf(false) }
     val favUrl = remember(websiteUrl) {
         val raw = websiteUrl.trim()
         val dom = raw.substringAfter("://").substringBefore("/").substringBefore("?").substringBefore("#")
         if (dom.contains(".")) "https://www.google.com/s2/favicons?domain=$dom&sz=128" else null
     }
-
-    val isFormValid = accountName.trim().isNotEmpty() && password.trim().isNotEmpty()
-
+    
     fun validateAndSave() {
         when {
             accountName.trim().isEmpty() -> errorMsg = "Nama akun wajib diisi"
             password.trim().isEmpty() -> errorMsg = "Password wajib diisi"
             else -> {
                 errorMsg = ""
-                onSaveClick(DraftAccount(accountName, username, password, websiteUrl, notes))
+                onSaveClick(account.copy(name = accountName, email = username, password = password, url = websiteUrl, notes = notes, iconUri = favUrl ?: account.iconUri))
             }
         }
     }
+
+    val isFormValid = accountName.trim().isNotEmpty() && password.trim().isNotEmpty()
 
     Scaffold(
         modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars),
@@ -89,7 +75,7 @@ fun AddPasswordScreen(
                 IconButton(onClick = onBackClick, modifier = Modifier.background(Color(0xFF1E293B), CircleShape).size(40.dp)) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = Color.White, modifier = Modifier.size(20.dp))
                 }
-                Text(text = "Tambah akun", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(text = "Edit Akun", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 IconButton(
                     onClick = { validateAndSave() },
                     modifier = Modifier.background(
@@ -113,11 +99,12 @@ fun AddPasswordScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)) {
+                val displayUrl = favUrl ?: account.iconUri
                 Box(
                     modifier = Modifier.size(84.dp).shadow(8.dp, CircleShape).clip(CircleShape).background(Color(0xFF1E293B), CircleShape).border(1.dp, Color(0xFF4E8CF7).copy(alpha = 0.25f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (favUrl != null) AsyncImage(model = favUrl, contentDescription = null, modifier = Modifier.fillMaxSize().clip(CircleShape), contentScale = ContentScale.Crop)
+                    if (displayUrl != null) AsyncImage(model = displayUrl, contentDescription = null, modifier = Modifier.fillMaxSize().clip(CircleShape), contentScale = ContentScale.Crop)
                     else Icon(Icons.Default.Key, contentDescription = "Ikon Kunci", tint = Color(0xFF4E8CF7), modifier = Modifier.size(36.dp))
                 }
                 Text(text = "Pilih Ikon", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF94A3B8))
@@ -125,19 +112,19 @@ fun AddPasswordScreen(
             if (errorMsg.isNotEmpty()) {
                 Text(text = errorMsg, fontSize = 12.sp, color = Color(0xFFFF6B9D), modifier = Modifier.padding(horizontal = 4.dp))
             }
-            FieldGroup(label = "Nama Akun", value = accountName, onValueChange = { accountName = it }, placeholder = "Contoh: Instagram", isError = errorMsg.contains("Nama akun"))
-            FieldGroup(label = "Username", value = username, onValueChange = { username = it }, placeholder = "nama_pengguna")
-            FieldGroup(label = "Password", value = password, onValueChange = { password = it }, placeholder = "", isPassword = true, passwordVisible = passwordVisible, onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }, onGenerateClick = onGenerateClick, isError = errorMsg.contains("Password"))
+            EditFieldGroup(label = "Nama Akun", value = accountName, onValueChange = { accountName = it }, placeholder = "Contoh: Instagram", isError = errorMsg.contains("Nama akun"))
+            EditFieldGroup(label = "Username", value = username, onValueChange = { username = it }, placeholder = "nama_pengguna")
+            EditFieldGroup(label = "Password", value = password, onValueChange = { password = it }, placeholder = "", isPassword = true, passwordVisible = passwordVisible, onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }, isError = errorMsg.contains("Password"))
             StrengthBar(password = password)
-            FieldGroup(label = "URL Website", value = websiteUrl, onValueChange = { websiteUrl = it }, placeholder = "https://example.com")
-            FieldGroup(label = "Catatan", value = notes, onValueChange = { notes = it }, placeholder = "Tambahkan detail tambahan...", singleLine = false)
+            EditFieldGroup(label = "URL Website", value = websiteUrl, onValueChange = { websiteUrl = it }, placeholder = "https://example.com")
+            EditFieldGroup(label = "Catatan", value = notes, onValueChange = { notes = it }, placeholder = "Tambahkan detail tambahan...", singleLine = false)
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun FieldGroup(
+fun EditFieldGroup(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -145,7 +132,6 @@ fun FieldGroup(
     isPassword: Boolean = false,
     passwordVisible: Boolean = false,
     onPasswordVisibilityToggle: () -> Unit = {},
-    onGenerateClick: (() -> Unit)? = null,
     singleLine: Boolean = true,
     isError: Boolean = false
 ) {
@@ -180,19 +166,10 @@ fun FieldGroup(
             visualTransformation = if (isPassword && !passwordVisible && value.isNotEmpty()) PasswordVisualTransformation() else VisualTransformation.None,
             singleLine = singleLine,
             isError = isError,
-            trailingIcon = if (isPassword) {
+            trailingIcon = if (isPassword && value.isNotEmpty()) {
                 {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (onGenerateClick != null) {
-                            IconButton(onClick = onGenerateClick, modifier = Modifier.size(36.dp)) {
-                                Icon(Icons.Default.Casino, contentDescription = "Generate", tint = Color(0xFF4E8CF7), modifier = Modifier.size(20.dp))
-                            }
-                        }
-                        if (value.isNotEmpty()) {
-                            IconButton(onClick = onPasswordVisibilityToggle, modifier = Modifier.size(36.dp)) {
-                                Icon(if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(20.dp))
-                            }
-                        }
+                    IconButton(onClick = onPasswordVisibilityToggle, modifier = Modifier.size(36.dp)) {
+                        Icon(imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(20.dp))
                     }
                 }
             } else null

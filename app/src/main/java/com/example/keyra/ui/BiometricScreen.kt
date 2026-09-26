@@ -6,7 +6,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.keyra.R
@@ -51,19 +54,25 @@ fun BiometricScreen(
         }
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0F1115))
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .systemBarsPadding()
+            .imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
-            modifier = Modifier.width(294.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 360.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             Column(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -74,33 +83,37 @@ fun BiometricScreen(
                 )
                 Text(
                     text = "Fast and secure biometrics login",
-                    fontSize = 20.sp,
+                    fontSize = 22.sp,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
                 Text(
                     text = "Log in safely and quickly by setting up your fingerprint",
-                    fontSize = 12.5.sp,
-                    color = Color(0xFF94A3B8)
+                    fontSize = 15.sp,
+                    color = Color(0xFF94A3B8),
+                    textAlign = TextAlign.Center
                 )
             }
 
             Column(
-                modifier = Modifier.width(294.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Button(
                     onClick = { launchBiometricPrompt() },
-                    modifier = Modifier.width(294.dp).height(57.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E8CF7)) // Warna biru Figma
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E8CF7))
                 ) {
-                    Text(text = "Turn On biometric", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Text(text = "Turn On biometric", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
 
                 TextButton(onClick = onSkipClick) {
-                    Text(text = "I’ll do it later", fontSize = 12.sp, color = Color.White)
+                    Text(text = "I'll do it later", fontSize = 14.sp, color = Color.White)
                 }
             }
         }

@@ -4,7 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -20,7 +23,7 @@ import com.example.keyra.R
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: () -> Unit = {},
+    onRegisterClick: (String, String) -> Unit = { _, _ -> },
     onLoginRedirectClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -32,20 +35,25 @@ fun RegisterScreen(
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches()
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0F1115))
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .systemBarsPadding()
+            .imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
-            modifier = Modifier.width(294.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 360.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Column(
-                modifier = Modifier.width(219.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -59,18 +67,21 @@ fun RegisterScreen(
             }
 
             Column(
-                modifier = Modifier.width(224.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = "Email", fontSize = 12.sp, color = Color.White)
+                    Text(text = "Email", fontSize = 15.sp, color = Color.White)
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        placeholder = { Text("name@gmail.com", color = Color(0x4AFFFFF9), fontSize = 12.sp) },
-                        modifier = Modifier.width(224.dp).height(55.dp),
+                        placeholder = { Text("name@gmail.com", color = Color(0x99FFFFF9), fontSize = 15.sp) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
                         singleLine = true,
-                        shape = RoundedCornerShape(8.dp),
+                        textStyle = TextStyle(fontSize = 18.sp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFF334155),
                             unfocusedContainerColor = Color(0xFF334155),
@@ -83,15 +94,18 @@ fun RegisterScreen(
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = "Password Master", fontSize = 12.sp, color = Color.White)
+                    Text(text = "Password Master", fontSize = 15.sp, color = Color.White)
                     OutlinedTextField(
                         value = masterPassword,
                         onValueChange = { masterPassword = it },
-                        placeholder = { Text("Enter Password Master", color = Color(0x4AFFFFF9), fontSize = 12.sp) },
-                        modifier = Modifier.width(224.dp).height(55.dp),
+                        placeholder = { Text("Enter Password Master", color = Color(0x99FFFFF9), fontSize = 15.sp) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
                         singleLine = true,
+                        textStyle = TextStyle(fontSize = 18.sp),
                         visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFF334155),
                             unfocusedContainerColor = Color(0xFF334155),
@@ -104,15 +118,18 @@ fun RegisterScreen(
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = "Confirm Password Master", fontSize = 12.sp, color = Color.White)
+                    Text(text = "Confirm Password Master", fontSize = 15.sp, color = Color.White)
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        placeholder = { Text("Enter Confirm Password", color = Color(0x4AFFFFF9), fontSize = 12.sp) },
-                        modifier = Modifier.width(224.dp).height(55.dp),
+                        placeholder = { Text("Enter Confirm Password", color = Color(0x99FFFFF9), fontSize = 15.sp) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
                         singleLine = true,
+                        textStyle = TextStyle(fontSize = 18.sp),
                         visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFF334155),
                             unfocusedContainerColor = Color(0xFF334155),
@@ -126,7 +143,7 @@ fun RegisterScreen(
             }
 
             Column(
-                modifier = Modifier.width(294.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -139,18 +156,20 @@ fun RegisterScreen(
                         } else if (masterPassword != confirmPassword) {
                             Toast.makeText(context, "Konfirmasi password tidak cocok!", Toast.LENGTH_SHORT).show()
                         } else {
-                            onRegisterClick()
+                            onRegisterClick(email, masterPassword)
                         }
                     },
-                    modifier = Modifier.width(294.dp).height(57.dp),
-                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E8CF7))
                 ) {
-                    Text(text = "Next", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Text(text = "Next", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
 
                 TextButton(onClick = onLoginRedirectClick) {
-                    Text(text = "Already have an account? Login", fontSize = 12.sp, color = Color.White)
+                    Text(text = "Already have an account? Login", fontSize = 14.sp, color = Color.White)
                 }
             }
         }

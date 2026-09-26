@@ -2,7 +2,9 @@ package com.example.keyra.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -23,10 +25,12 @@ private val DangerRed = Color(0xFFFCA5A5)
 
 @Composable
 fun SettingsScreen(
+    biometricEnabled: Boolean = false,
+    onBiometricChange: (Boolean) -> Unit = {},
     onHomeClick: () -> Unit = {},
     onSecurityClick: () -> Unit = {},
     onAccountClick: () -> Unit = {},
-    onBiometricClick: () -> Unit = {},
+    onBiometricClick: (Boolean) -> Unit = {},
     onThemeClick: () -> Unit = {},
     onLanguageClick: () -> Unit = {},
     onBackupClick: () -> Unit = {},
@@ -34,6 +38,11 @@ fun SettingsScreen(
     onLogoutClick: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableIntStateOf(2) }
+    // sinkron dari onboarding: jika onBiometricClick lama dipakai, teruskan ke onBiometricChange
+    val onToggle: (Boolean) -> Unit = { v ->
+        onBiometricChange(v)
+        onBiometricClick(v)
+    }
 
     Scaffold(
         containerColor = BgDark,
@@ -42,7 +51,7 @@ fun SettingsScreen(
                 containerColor = Color(0xFF1E293B),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(76.dp),
+                    .navigationBarsPadding(),
                 windowInsets = NavigationBarDefaults.windowInsets
             ) {
                 NavigationBarItem(
@@ -115,6 +124,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -134,10 +144,11 @@ fun SettingsScreen(
                     onClick = onAccountClick
                 )
                 HorizontalDivider(color = DividerColor, thickness = 1.dp)
-                SettingsItem(
+                SettingsToggleItem(
                     icon = Icons.Default.Fingerprint,
                     title = "Kunci dengan Biometrik",
-                    onClick = onBiometricClick
+                    checked = biometricEnabled,
+                    onCheckedChange = onToggle
                 )
             }
 
@@ -234,6 +245,52 @@ fun SettingsItem(
             contentDescription = null,
             tint = TextMuted,
             modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+fun SettingsToggleItem(
+    icon: ImageVector,
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF22C55E),
+                checkedBorderColor = Color(0xFF22C55E),
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = Color(0xFF334155),
+                uncheckedBorderColor = Color(0xFF334155)
+            )
         )
     }
 }
